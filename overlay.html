@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>VMK MA Overlay</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarpanch:wght@700;900&family=Kanit:wght@500;600&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#07080d;--panel:#0d0f17;--panel2:#1a1d29;--line:#3a4054;--volt:#ccff00;--cyan:#00deff;--red:#ff3a55;--gold:#ffcc33;--silver:#cdd6e4;--bronze:#d68a52;--up:#46e682;--text:#f8f9ff;--muted:#acb3c6}
+*{box-sizing:border-box}
+html,body{margin:0;background:transparent;font-family:'Kanit',system-ui,sans-serif;color:var(--text);-webkit-font-smoothing:antialiased;overflow:hidden}
+.wrap{position:relative;width:min(400px,calc(100vw - 20px));margin:10px}
+.box{background:rgba(13,15,23,.9);border:1px solid var(--line);border-radius:6px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.45)}
+.brk{position:absolute;width:16px;height:16px;border:0 solid var(--volt);animation:breathe 2.4s ease-in-out infinite}
+.tl{top:-3px;left:-3px;border-top-width:2px;border-left-width:2px}.tr{top:-3px;right:-3px;border-top-width:2px;border-right-width:2px}
+.bl{bottom:-3px;left:-3px;border-bottom-width:2px;border-left-width:2px}.br{bottom:-3px;right:-3px;border-bottom-width:2px;border-right-width:2px}
+@keyframes breathe{50%{opacity:.45}}
+.head{display:flex;align-items:center;gap:10px;padding:9px 12px 8px}
+.head .t{font-family:'Sarpanch',sans-serif;font-weight:900;font-size:22px;letter-spacing:1px;line-height:1}
+.head .c{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--volt);display:flex;align-items:center;gap:6px;margin-bottom:3px}
+.live{width:7px;height:7px;border-radius:50%;background:var(--red);animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:.25}}
+.cnt{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--volt);border:1px solid rgba(204,255,0,.5);border-radius:99px;padding:3px 10px}
+.scan{height:2px;background:linear-gradient(90deg,rgba(204,255,0,.25) 40%,var(--volt) 50%,rgba(204,255,0,.25) 60%);background-size:250% 100%;animation:scan 2.6s linear infinite}
+@keyframes scan{from{background-position:150% 0}to{background-position:-100% 0}}
+.clockbox{display:flex;align-items:center;margin:8px;padding:6px 10px;background:rgba(7,8,13,.85);border-left:3px solid var(--volt);border-radius:4px}
+.clock{font-family:'JetBrains Mono',monospace;font-size:28px;color:var(--volt);line-height:1.1}
+.cap{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:2px}
+.side{margin-left:auto;text-align:right;min-width:0}
+.lap{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--cyan);border:1px solid rgba(0,222,255,.6);border-radius:3px;padding:1px 8px}
+.lead{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px;margin-top:3px}
+.list{position:relative;margin:0 8px 8px;transition:height .35s}
+.r{position:absolute;left:0;right:0;height:42px;display:grid;grid-template-columns:26px 30px minmax(0,1fr) auto;gap:9px;align-items:center;padding-right:7px;border-radius:4px;background:rgba(26,29,41,.75);transition:transform .45s cubic-bezier(.2,.9,.2,1),opacity .35s;overflow:hidden}
+.r::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--acc)}
+.r.ld{background:linear-gradient(90deg,rgba(204,255,0,.24),rgba(26,29,41,.75) 70%)}
+.rk{font-family:'Sarpanch',sans-serif;font-weight:900;font-size:19px;text-align:center;color:var(--muted);padding-left:4px}
+.av{width:28px;height:28px;border-radius:6px;display:grid;place-items:center;font-family:'Sarpanch',sans-serif;font-weight:900;font-size:14px;border:1.5px solid var(--acc2);background:rgba(255,255,255,.06)}
+.nm{min-width:0}
+.nm b{display:block;font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
+.nm span{font-size:12px;color:var(--muted)}
+.nm .bo{color:var(--gold)}
+.ch{font-family:'JetBrains Mono',monospace;font-size:13px;padding:3px 7px;border-radius:3px;background:rgba(7,8,13,.8);color:var(--muted);min-width:62px;text-align:center}
+.ch.l{background:var(--volt);color:var(--ink)}.ch.o{background:var(--red);color:#fff}.ch.f{background:var(--gold);color:var(--ink)}
+.bar{position:absolute;left:3px;bottom:0;height:2px;background:var(--acc2);transition:width .9s linear}
+.r.up{animation:fu .9s}.r.dn{animation:fd .9s}
+@keyframes fu{from{box-shadow:inset 0 0 0 99px rgba(70,230,130,.3)}to{box-shadow:inset 0 0 0 99px rgba(70,230,130,0)}}
+@keyframes fd{from{box-shadow:inset 0 0 0 99px rgba(255,58,85,.28)}to{box-shadow:inset 0 0 0 99px rgba(255,58,85,0)}}
+.hint{text-align:center;color:var(--muted);font-size:14px;padding:12px 0 14px}
+.bad{color:#ff9aa9;font-size:14px;padding:16px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap" id="wrap">
+  <i class="brk tl"></i><i class="brk tr"></i><i class="brk bl"></i><i class="brk br"></i>
+  <div class="box">
+    <div class="head">
+      <div>
+        <div class="c"><span class="live"></span>VMK MA · LIVE</div>
+        <div class="t">STANDINGS</div>
+      </div>
+      <div class="cnt" id="cnt">👥 0</div>
+    </div>
+    <div class="scan"></div>
+    <div class="clockbox">
+      <div><div class="cap">เวลาแข่ง</div><div class="clock" id="clock">0:00.0</div></div>
+      <div class="side"><span class="lap" id="lap">รอบ 1/1</span><div class="lead" id="lead"></div></div>
+    </div>
+    <div class="list" id="list"></div>
+    <div class="hint" id="hint">💬 คอมเมนต์เพื่อเข้าแข่ง!</div>
+  </div>
+</div>
+<script>
+(() => {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const V = new URLSearchParams(location.search).get('v') || '';
+  const ROWS = Math.max(3, Math.min(12, Number(new URLSearchParams(location.search).get('rows')) || 10));
+  const H = 42, G = 4;
+  let data = null, at = 0;
+  const rows = new Map();
+  const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
+  const fmt = (t) => { t = Math.max(0, t || 0); return Math.floor(t / 60) + ':' + (t % 60).toFixed(1).padStart(4, '0'); };
+  const short = (n) => { n = Math.round(n || 0); return n >= 100000 ? Math.round(n / 1000) + 'K' : n >= 10000 ? (n / 1000).toFixed(1) + 'K' : String(n); };
+  const hex = (c) => typeof c === 'string' && /^#[0-9a-f]{6}$/i.test(c) ? c : '#00deff';
+
+  function render(s) {
+    const tower = (s && s.tower) || [];
+    const racing = s && (s.phase === 'Racing' || s.phase === 'Finished' || s.phase === 'Lights');
+    $('cnt').textContent = '👥 ' + ((s && s.count) || 0);
+    $('lap').textContent = 'รอบ ' + Math.min((s && s.leaderLap) || 1, (s && s.laps) || 1) + '/' + ((s && s.laps) || 1);
+    const ld = tower[0];
+    $('lead').textContent = ld && racing ? '🥇 ' + ld.name + ' · ' + (ld.dist || 0) + ' m' : (s && s.phase === 'Waiting' ? (s.message || 'รอนักแข่ง') : '');
+    const total = s && s.trackLen ? s.trackLen * (s.laps || 1) : 0;
+    const seen = new Set();
+    const podium = ['var(--gold)', 'var(--silver)', 'var(--bronze)'];
+    tower.slice(0, ROWS).forEach((e, i) => {
+      const id = String(e.id); seen.add(id);
+      let r = rows.get(id);
+      if (!r) {
+        const row = el('div', 'r'), rk = el('div', 'rk'), av = el('div', 'av'), nm = el('div', 'nm'), b = el('b'), sub = el('span'), ch = el('div', 'ch'), bar = el('div', 'bar');
+        nm.append(b, sub); row.append(rk, av, nm, ch, bar);
+        row.style.transform = `translate(-30px,${i * (H + G)}px)`; row.style.opacity = '0';
+        $('list').appendChild(row);
+        requestAnimationFrame(() => { row.style.opacity = '1'; row.style.transform = `translate(0,${i * (H + G)}px)`; });
+        r = { row, rk, av, b, sub, ch, bar, place: null }; rows.set(id, r);
+      }
+      if (r.place && r.place !== i + 1 && racing) { r.row.classList.remove('up', 'dn'); void r.row.offsetWidth; r.row.classList.add(i + 1 < r.place ? 'up' : 'dn'); }
+      r.place = i + 1;
+      r.row.style.transform = `translate(0,${i * (H + G)}px)`;
+      const col = hex(e.c);
+      r.row.style.setProperty('--acc', racing && i < 3 ? podium[i] : col);
+      r.row.style.setProperty('--acc2', col);
+      r.row.classList.toggle('ld', racing && i === 0 && !e.caught);
+      r.rk.textContent = String(i + 1); r.rk.style.color = racing && i < 3 ? podium[i] : '';
+      const nm = String(e.name || '?');
+      r.av.textContent = (nm.match(/[A-Za-z0-9ก-๙]/) || ['?'])[0].toUpperCase();
+      r.b.textContent = nm; r.b.style.opacity = e.caught ? '.5' : '1';
+      r.sub.replaceChildren(el('span', 'bo', '⚡' + short(e.coins)), document.createTextNode(racing ? '  ·  ' + (e.dist || 0) + ' m' : ''));
+      let t = String(e.gap || ''), c = 'ch';
+      if (e.caught || t === 'CAUGHT') { t = 'ตกรอบ'; c += ' o'; }
+      else if (e.done) { t = e.time ? fmt(e.time) : 'เข้าเส้น'; c += ' f'; }
+      else if (t === 'LEADER') { t = 'ผู้นำ'; c += ' l'; }
+      else if (!racing) t = '#' + (e.slot || i + 1);
+      else if (/^\+[\d.]+$/.test(t)) t += 's';
+      r.ch.className = c; r.ch.textContent = t;
+      const p = e.dist != null ? e.dist / 0.28 : 0;
+      r.bar.style.width = (e.done ? 100 : total > 0 ? Math.min(100, p / total * 100) : 0) + '%';
+    });
+    for (const [id, r] of rows) if (!seen.has(id)) { rows.delete(id); r.row.style.opacity = '0'; setTimeout(() => r.row.remove(), 350); }
+    const n = Math.min(ROWS, tower.length);
+    $('list').style.height = (n ? n * (H + G) - G : 0) + 'px';
+    $('hint').style.display = n ? 'none' : 'block';
+  }
+
+  async function poll() {
+    try {
+      const r = await fetch('/api/view?v=' + encodeURIComponent(V), { cache: 'no-store' });
+      if (r.status === 403) { document.querySelector('.box').replaceChildren(el('div', 'bad', 'ลิงก์ overlay ไม่ถูกต้อง คัดลอกใหม่จากแผงควบคุม')); return; }
+      const j = await r.json();
+      data = j; at = performance.now();
+      render(j.state);
+    } catch (_) {}
+    setTimeout(poll, 1000);
+  }
+  (function tick() {
+    const s = data && data.state;
+    if (s) {
+      let t = s.clock || 0;
+      if (s.phase === 'Racing') t += ((data.age || 0) + performance.now() - at) / 1000;
+      if (s.phase === 'Waiting') t = 0;
+      $('clock').textContent = fmt(t);
+    }
+    requestAnimationFrame(tick);
+  })();
+  poll();
+})();
+</script>
+</body>
+</html>
