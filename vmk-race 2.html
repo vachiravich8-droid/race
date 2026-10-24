@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#07080d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="robots" content="noindex">
+<title>VMK MA Race</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2307080d'/%3E%3Cpath d='M14 18h9l9 22 9-22h9L37 48h-10z' fill='%23ccff00'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarpanch:wght@700;900&family=Kanit:wght@400;500;600&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#07080d; --panel:#0d0f17; --panel2:#151826; --panel3:#1d2132; --line:#2c3247; --line2:#3a4054;
+  --volt:#ccff00; --cyan:#00deff; --red:#ff3a55; --gold:#ffcc33; --silver:#cdd6e4; --bronze:#d68a52;
+  --up:#46e682; --text:#f4f6fc; --muted:#a3abc2; --dim:#6c748c;
+  --display:'Sarpanch',sans-serif; --body:'Kanit',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;color:var(--text);font-family:var(--body);font-size:15px;-webkit-font-smoothing:antialiased}
+body{min-height:100vh;background:
+  linear-gradient(rgba(0,222,255,.035) 1px,transparent 1px) 0 0/34px 34px,
+  linear-gradient(90deg,rgba(0,222,255,.035) 1px,transparent 1px) 0 0/34px 34px,
+  radial-gradient(1000px 500px at 10% -10%,rgba(204,255,0,.07),transparent 60%),var(--ink)}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+
+/* screens */
+.screen{min-height:100vh;display:grid;place-items:center;padding:16px}
+.box{width:min(440px,100%);background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:28px 24px;position:relative}
+.brk{position:absolute;width:18px;height:18px;border:0 solid var(--volt)}
+.brk.tl{top:-4px;left:-4px;border-top-width:2px;border-left-width:2px}.brk.tr{top:-4px;right:-4px;border-top-width:2px;border-right-width:2px}
+.brk.bl{bottom:-4px;left:-4px;border-bottom-width:2px;border-left-width:2px}.brk.br{bottom:-4px;right:-4px;border-bottom-width:2px;border-right-width:2px}
+.logo{font-family:var(--display);font-weight:900;font-size:32px;letter-spacing:2px;line-height:1}
+.logo small{display:block;font-family:var(--mono);font-size:11px;color:var(--volt);letter-spacing:3px;margin-top:6px}
+.lead{color:var(--muted);margin:14px 0 18px;line-height:1.5}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.field label{font-size:12px;color:var(--muted)}
+input{background:var(--ink);border:1px solid var(--line2);border-radius:8px;padding:11px 12px;outline:none;width:100%}
+input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,222,255,.15)}
+.err{color:var(--red);font-size:13px;min-height:18px;margin-bottom:6px}
+.btn{border:1px solid var(--line2);background:var(--panel3);border-radius:8px;padding:11px 14px;font-weight:500;transition:transform .08s,border-color .15s}
+.btn:hover{border-color:var(--cyan)}
+.btn:active{transform:scale(.97)}
+.btn.volt{background:var(--volt);color:var(--ink);border-color:var(--volt);font-weight:600}
+.btn.danger{background:rgba(255,58,85,.12);border-color:rgba(255,58,85,.5);color:#ff9aa9}
+.btn.ghost{background:transparent}
+.btn.small{padding:6px 11px;font-size:13px}
+.btn.wide{width:100%}
+.btn[disabled]{opacity:.45;pointer-events:none}
+
+/* server list */
+.servers{display:flex;flex-direction:column;gap:8px;margin:4px 0 14px}
+.srv{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;text-align:left;padding:13px 14px;border-radius:10px;border:1px solid var(--line2);background:var(--panel2);width:100%}
+.srv:hover{border-color:var(--volt)}
+.srv b{display:block;font-weight:600}
+.srv span{font-size:12px;color:var(--muted)}
+.srv .go{font-family:var(--mono);color:var(--volt)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--up);box-shadow:0 0 8px var(--up)}
+.wait{color:var(--muted);text-align:center;padding:22px 0;line-height:1.6;font-size:14px}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--line2);border-top-color:var(--volt);border-radius:50%;animation:sp 1s linear infinite;vertical-align:-2px;margin-right:6px}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* race view */
+.view{max-width:720px;margin:0 auto;padding:14px 16px 40px}
+.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.top .logo{font-size:22px}.top .logo small{font-size:9px;margin-top:3px}
+.top .right{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pill{display:flex;align-items:center;gap:7px;padding:6px 11px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);font-size:13px;white-space:nowrap}
+.pill .dot.off{background:var(--red);box-shadow:none}.pill .dot.warn{background:var(--gold);box-shadow:none}
+.card{background:rgba(13,15,23,.92);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:14px}
+.card h2{margin:0 0 12px;font-family:var(--display);font-weight:700;font-size:15px;letter-spacing:1.5px;display:flex;align-items:center;gap:8px}
+.card h2 .th{font-family:var(--body);font-weight:500;letter-spacing:0;color:var(--muted);font-size:13px}
+.card h2::before{content:"";width:3px;height:16px;background:var(--volt);border-radius:2px}
+.status{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.cap{font-size:11px;color:var(--muted);letter-spacing:2px;font-family:var(--mono);margin-bottom:6px}
+.clock{font-family:var(--mono);font-weight:700;font-size:48px;color:var(--volt);line-height:1;text-shadow:0 0 22px rgba(204,255,0,.25)}
+.phase{font-weight:600;padding:6px 13px;border-radius:7px;background:var(--panel3);font-size:14px;white-space:nowrap}
+.phase.racing{background:rgba(70,230,130,.14);color:var(--up)}
+.phase.lights{background:rgba(255,204,51,.14);color:var(--gold)}
+.phase.finished{background:rgba(0,222,255,.12);color:var(--cyan)}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:16px}
+.stat{background:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px 10px;min-width:0}
+.stat b{display:block;font-family:var(--mono);font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat span{font-size:11px;color:var(--muted)}
+.msg{margin-top:10px;color:var(--muted);font-size:13px;min-height:18px}
+.actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.actions .btn{flex:1 1 120px}
+.actions .btn.volt{flex:2 1 160px}
+@media(max-width:520px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.clock{font-size:38px}}
+
+/* standings */
+.lb{position:relative}
+.row{position:absolute;left:0;right:0;height:46px;display:grid;grid-template-columns:30px 32px minmax(0,1fr) auto;gap:10px;align-items:center;padding-right:10px;border-radius:7px;background:rgba(29,33,50,.65);transition:transform .45s cubic-bezier(.2,.9,.2,1),opacity .35s;overflow:hidden}
+.row::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--acc,var(--line2))}
+.row.lead{background:linear-gradient(90deg,rgba(204,255,0,.2),rgba(29,33,50,.65) 70%)}
+.rk{font-family:var(--display);font-weight:900;font-size:19px;text-align:center;color:var(--muted);padding-left:3px}
+.av{width:30px;height:30px;border-radius:7px;display:grid;place-items:center;font-family:var(--display);font-weight:900;font-size:14px;border:1.5px solid var(--acc2,var(--cyan));background:rgba(255,255,255,.05)}
+.nm{min-width:0}
+.nm b{display:block;font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nm span{font-size:12px;color:var(--muted);font-family:var(--mono)}
+.nm .bolt{color:var(--gold)}
+.chip{font-family:var(--mono);font-size:13px;padding:4px 8px;border-radius:5px;background:var(--ink);color:var(--muted);min-width:64px;text-align:center}
+.chip.l{background:var(--volt);color:var(--ink);font-weight:700}.chip.o{background:var(--red);color:#fff}.chip.f{background:var(--gold);color:var(--ink)}
+.bar{position:absolute;left:3px;bottom:0;height:2px;background:var(--acc2,var(--cyan));transition:width .9s linear}
+.row.up{animation:fu .9s}.row.dn{animation:fd .9s}
+@keyframes fu{from{box-shadow:inset 0 0 0 99px rgba(70,230,130,.28)}to{box-shadow:inset 0 0 0 99px rgba(70,230,130,0)}}
+@keyframes fd{from{box-shadow:inset 0 0 0 99px rgba(255,58,85,.25)}to{box-shadow:inset 0 0 0 99px rgba(255,58,85,0)}}
+.empty{color:var(--dim);text-align:center;padding:26px 0;font-size:14px}
+.toasts{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:60;width:min(420px,calc(100% - 32px));pointer-events:none}
+.toast{background:var(--panel3);border:1px solid var(--line2);border-left:3px solid var(--volt);padding:10px 14px;border-radius:8px;font-size:14px;box-shadow:0 10px 30px rgba(0,0,0,.45)}
+.toast.bad{border-left-color:var(--red)}
+</style>
+</head>
+<body>
+
+<!-- 1. password -->
+<section class="screen" id="sLogin">
+  <form class="box" id="loginForm" autocomplete="off">
+    <i class="brk tl"></i><i class="brk tr"></i><i class="brk bl"></i><i class="brk br"></i>
+    <div class="logo">VMK MA<small>RACE VIEW</small></div>
+    <p class="lead">ใส่รหัสเพื่อเข้าดูการแข่ง</p>
+    <div class="field">
+      <label for="keyInput">รหัสเข้าใช้</label>
+      <input id="keyInput" type="password" required autocomplete="current-password">
+    </div>
+    <div class="err" id="loginErr"></div>
+    <button class="btn volt wide" type="submit" id="loginBtn">เข้าสู่ระบบ</button>
+  </form>
+</section>
+
+<!-- 2. choose server -->
+<section class="screen hidden" id="sPick">
+  <div class="box">
+    <i class="brk tl"></i><i class="brk tr"></i><i class="brk bl"></i><i class="brk br"></i>
+    <div class="logo">VMK MA<small>เลือกเซิร์ฟเวอร์</small></div>
+    <p class="lead">เลือกเซิร์ฟเวอร์ที่จะดูและควบคุมการแข่ง</p>
+    <div class="servers" id="srvList"></div>
+    <div class="wait" id="srvWait"><span class="spin"></span>ยังไม่มีเกมออนไลน์<br>เปิดเกม (หรือกด Play ใน Studio) แล้วรอสักครู่ รายชื่อจะขึ้นเอง</div>
+    <button class="btn ghost wide" type="button" id="logout1">ออกจากระบบ</button>
+  </div>
+</section>
+
+<!-- 3. race -->
+<div class="view hidden" id="sView">
+  <div class="top">
+    <div class="logo">VMK MA<small>RACE CONTROL</small></div>
+    <div class="right">
+      <div class="pill"><span class="dot" id="gDot"></span><span id="gTxt">-</span></div>
+      <button class="btn small" type="button" id="change">🎯 เปลี่ยนเซิร์ฟ</button>
+      <button class="btn small ghost" type="button" id="logout2">ออก</button>
+    </div>
+  </div>
+
+  <section class="card">
+    <h2>RACE <span class="th">สถานะการแข่ง</span></h2>
+    <div class="status">
+      <div><div class="cap">RACE TIME</div><div class="clock" id="clock">0:00.0</div></div>
+      <div class="phase" id="phase">รอเกม</div>
+    </div>
+    <div class="stats">
+      <div class="stat"><b id="stRacers">-</b><span>นักแข่ง</span></div>
+      <div class="stat"><b id="stLap">-</b><span>รอบ</span></div>
+      <div class="stat"><b id="stMap">-</b><span>สนาม</span></div>
+      <div class="stat"><b id="stMode">-</b><span>โหมด</span></div>
+    </div>
+    <div class="msg" id="msg"></div>
+    <div class="actions">
+      <button class="btn volt" data-cmd='{"type":"start"}'>🏁 เริ่มแข่ง</button>
+      <button class="btn danger" data-cmd='{"type":"clear"}' data-confirm="จบ / ล้างสนามตอนนี้?">⏹ จบ / ล้างสนาม</button>
+      <button class="btn" data-cmd='{"type":"test","number":10}'>+10 ทดสอบ</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>STANDINGS <span class="th">อันดับสด</span></h2>
+    <div class="lb" id="lb"><div class="empty" id="lbEmpty">ยังไม่มีนักแข่ง</div></div>
+  </section>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const LS = { get(k) { try { return localStorage.getItem(k); } catch (_) { return null; } },
+               set(k, v) { try { localStorage.setItem(k, v); } catch (_) {} },
+               del(k) { try { localStorage.removeItem(k); } catch (_) {} } };
+  const BASE = 'https://tiktok-bridge-a4bq.onrender.com'; // (the bridge is built in: only the password is typed)
+  let KEY = LS.get('vmk_race_key') || '';
+  let SERVER = null;            // chosen jobId
+  let live = null, liveAt = 0, timer = null, busy = false, screen = 'login';
+  const PHASE = { Waiting: ['รอเริ่ม', ''], Lights: ['ไฟเตรียมออกตัว', 'lights'], Racing: ['กำลังแข่ง', 'racing'], Finished: ['จบแล้ว', 'finished'] };
+
+  const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
+  const fmt = (t) => { t = Math.max(0, t || 0); return Math.floor(t / 60) + ':' + (t % 60).toFixed(1).padStart(4, '0'); };
+  const short = (n) => { n = Math.round(n || 0); return n >= 100000 ? Math.round(n / 1000) + 'K' : n >= 10000 ? (n / 1000).toFixed(1) + 'K' : String(n); };
+  const hex = (c) => typeof c === 'string' && /^#[0-9a-f]{6}$/i.test(c) ? c : '#00deff';
+  function toast(t, bad) { const e = el('div', 'toast' + (bad ? ' bad' : ''), t); $('toasts').appendChild(e); setTimeout(() => e.remove(), 2800); }
+  function cleanBase(u) {
+    u = String(u || '').trim().replace(/\/+(panel\/?)?$/, '').replace(/\/+$/, '');
+    if (u && !/^https?:\/\//i.test(u)) u = 'https://' + u;
+    return u;
+  }
+  async function api(path, body) {
+    const opt = { headers: { 'X-Bridge-Key': KEY }, cache: 'no-store' };
+    if (body) { opt.method = 'POST'; opt.headers['Content-Type'] = 'application/json'; opt.body = JSON.stringify(body); }
+    const r = await fetch(BASE + path, opt);
+    const j = await r.json().catch(() => ({}));
+    if (r.status === 403 && j.error === 'Wrong BRIDGE_KEY') { logout('รหัสไม่ถูกต้อง'); throw new Error('key'); }
+    if (!r.ok) throw new Error(j.error || ('HTTP ' + r.status));
+    return j;
+  }
+
+  function show(name) {
+    screen = name;
+    $('sLogin').classList.toggle('hidden', name !== 'login');
+    $('sPick').classList.toggle('hidden', name !== 'pick');
+    $('sView').classList.toggle('hidden', name !== 'view');
+  }
+  function logout(err) {
+    KEY = ''; SERVER = null; LS.del('vmk_race_key'); clearTimeout(timer);
+    show('login'); $('loginErr').textContent = err || '';
+  }
+
+  // ---------- 1. password
+  $('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    KEY = $('keyInput').value.trim();
+    $('loginErr').textContent = 'กำลังตรวจสอบ… (ถ้าเซิร์ฟเวอร์หลับอยู่ อาจรอได้ถึง 1 นาที)';
+    $('loginBtn').disabled = true;
+    try {
+      await api('/api/live');
+      LS.set('vmk_race_key', KEY);
+      $('keyInput').value = ''; $('loginErr').textContent = '';
+      show('pick'); poll();
+    } catch (err) {
+      if (err.message !== 'key') $('loginErr').textContent = err.message === 'Failed to fetch'
+        ? 'ติดต่อเซิร์ฟเวอร์ไม่ได้: รอสักครู่ (เซิร์ฟเวอร์อาจกำลังตื่น) แล้วลองใหม่' : 'เชื่อมต่อไม่ได้: ' + err.message;
+    }
+    $('loginBtn').disabled = false;
+  });
+  $('logout1').addEventListener('click', () => logout());
+  $('logout2').addEventListener('click', () => logout());
+
+  // ---------- 2. choose server
+  function renderPick(j) {
+    const list = $('srvList');
+    const sig = j.servers.map((s) => s.jobId + s.players + s.phase + s.count).join('|');
+    $('srvWait').classList.toggle('hidden', j.servers.length > 0);
+    if (list.dataset.sig === sig) return;
+    list.dataset.sig = sig;
+    list.replaceChildren(...j.servers.map((s, i) => {
+      const b = el('button', 'srv'); b.type = 'button';
+      const info = el('div');
+      info.append(el('b', null, s.studio ? 'Roblox Studio (ทดสอบ)' : 'เซิร์ฟเวอร์ ' + (i + 1) + ' · ' + s.jobId.slice(0, 5).toUpperCase()),
+        el('span', null, (s.players || 0) + ' ผู้เล่น · ' + (s.count || 0) + ' นักแข่ง · ' + (PHASE[s.phase] ? PHASE[s.phase][0] : (s.phase || '-')) + (s.map ? ' · ' + s.map : '')));
+      b.append(el('span', 'dot'), info, el('span', 'go', 'เลือก →'));
+      b.addEventListener('click', () => { SERVER = s.jobId; LS.set('vmk_race_server', SERVER); show('view'); poll(); });
+      return b;
+    }));
+  }
+  $('change').addEventListener('click', () => { SERVER = null; show('pick'); $('srvList').dataset.sig = ''; poll(); });
+
+  // ---------- 3. race
+  async function send(c) {
+    try {
+      const r = await api('/api/cmd', Object.assign({ server: SERVER }, c));
+      toast('ส่งแล้ว');
+      return r;
+    } catch (err) { if (err.message !== 'key') toast('ส่งไม่สำเร็จ: ' + err.message, true); }
+  }
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-cmd]'); if (!b) return;
+    if (b.dataset.confirm && !confirm(b.dataset.confirm)) return;
+    send(JSON.parse(b.dataset.cmd));
+  });
+
+  const rows = new Map(); const H = 46, G = 5;
+  function renderBoard(s) {
+    const tower = (s && s.tower) || [];
+    const racing = s && (s.phase === 'Racing' || s.phase === 'Finished' || s.phase === 'Lights');
+    const total = s && s.trackLen ? s.trackLen * (s.laps || 1) : 0;
+    const podium = ['var(--gold)', 'var(--silver)', 'var(--bronze)'];
+    const seen = new Set();
+    tower.slice(0, 12).forEach((e, i) => {
+      const id = String(e.id); seen.add(id);
+      let r = rows.get(id);
+      if (!r) {
+        const row = el('div', 'row'), rk = el('div', 'rk'), av = el('div', 'av'), nm = el('div', 'nm'), b = el('b'), sub = el('span'), ch = el('div', 'chip'), bar = el('div', 'bar');
+        nm.append(b, sub); row.append(rk, av, nm, ch, bar);
+        row.style.transform = `translateY(${i * (H + G)}px)`; row.style.opacity = '0';
+        $('lb').appendChild(row); requestAnimationFrame(() => { row.style.opacity = '1'; });
+        r = { row, rk, av, b, sub, ch, bar, place: null }; rows.set(id, r);
+      }
+      if (r.place && r.place !== i + 1 && racing) { r.row.classList.remove('up', 'dn'); void r.row.offsetWidth; r.row.classList.add(i + 1 < r.place ? 'up' : 'dn'); }
+      r.place = i + 1;
+      r.row.style.transform = `translateY(${i * (H + G)}px)`;
+      const col = hex(e.c);
+      r.row.style.setProperty('--acc', racing && i < 3 ? podium[i] : col);
+      r.row.style.setProperty('--acc2', col);
+      r.row.classList.toggle('lead', racing && i === 0 && !e.caught);
+      r.rk.textContent = String(i + 1); r.rk.style.color = racing && i < 3 ? podium[i] : '';
+      const nm = String(e.name || '?');
+      r.av.textContent = (nm.match(/[A-Za-z0-9ก-๙]/) || ['?'])[0].toUpperCase();
+      r.b.textContent = nm; r.b.style.opacity = e.caught ? '.5' : '1';
+      r.sub.replaceChildren(el('span', 'bolt', '⚡' + short(e.coins)), document.createTextNode(racing ? '  ·  ' + (e.dist || 0) + ' m' : ''));
+      let t = String(e.gap || ''), c = 'chip';
+      if (e.caught || t === 'CAUGHT') { t = 'ตกรอบ'; c += ' o'; }
+      else if (e.done) { t = e.time ? fmt(e.time) : 'เข้าเส้น'; c += ' f'; }
+      else if (t === 'LEADER') { t = 'ผู้นำ'; c += ' l'; }
+      else if (!racing) t = '#' + (e.slot || i + 1);
+      else if (/^\+[\d.]+$/.test(t)) t += 's';
+      r.ch.className = c; r.ch.textContent = t;
+      const p = e.dist != null ? e.dist / 0.28 : 0;
+      r.bar.style.width = (e.done ? 100 : total > 0 ? Math.min(100, p / total * 100) : 0) + '%';
+    });
+    for (const [id, r] of rows) if (!seen.has(id)) { rows.delete(id); r.row.style.opacity = '0'; setTimeout(() => r.row.remove(), 350); }
+    const n = Math.min(12, tower.length);
+    $('lb').style.height = n ? (n * (H + G) - G) + 'px' : 'auto';
+    $('lbEmpty').classList.toggle('hidden', n > 0);
+  }
+  function renderView(j) {
+    const here = j.servers.find((s) => s.jobId === SERVER);
+    const online = !!here && j.server === SERVER && here.age < 15000;
+    $('gDot').className = 'dot ' + (online ? (here.age < 5000 ? '' : 'warn') : 'off');
+    $('gTxt').textContent = online ? (here.studio ? 'Studio' : 'เซิร์ฟ ' + SERVER.slice(0, 5).toUpperCase()) + ' · ออนไลน์' : 'เซิร์ฟนี้ออฟไลน์';
+    for (const b of document.querySelectorAll('[data-cmd]')) b.disabled = !online;
+    const s = online ? j.state : null;
+    if (s) {
+      const ph = PHASE[s.phase] || [s.phase || '-', ''];
+      $('phase').textContent = ph[0]; $('phase').className = 'phase ' + ph[1];
+      $('stRacers').textContent = (s.count || 0) + (s.capacity ? ' / ' + s.capacity : '');
+      $('stLap').textContent = Math.min(s.leaderLap || 1, s.laps || 1) + ' / ' + (s.laps || 1);
+      $('stMap').textContent = s.mapName || s.map || '-';
+      $('stMode').textContent = s.mode === 'MANUAL' ? 'กดเอง' : s.mode === 'AUTO' ? 'อัตโนมัติ' : (s.mode || '-');
+      $('msg').textContent = s.message || '';
+    } else {
+      $('phase').textContent = 'ออฟไลน์'; $('phase').className = 'phase';
+      $('msg').textContent = here ? '' : 'เซิร์ฟนี้ปิดไปแล้ว กด "เปลี่ยนเซิร์ฟ" เพื่อเลือกใหม่';
+    }
+    renderBoard(s);
+  }
+
+  async function poll() {
+    if (!KEY || busy || screen === 'login') return;
+    busy = true; clearTimeout(timer);
+    try {
+      const q = SERVER ? '?server=' + encodeURIComponent(SERVER) : '';
+      const j = await api('/api/live' + q);
+      live = j; liveAt = performance.now();
+      if (screen === 'pick') renderPick(j); else if (screen === 'view') renderView(j);
+    } catch (err) {
+      if (err.message === 'key') { busy = false; return; }
+      if (screen === 'view') { $('gDot').className = 'dot off'; $('gTxt').textContent = 'เชื่อมเว็บไม่ได้ · ลองใหม่…'; }
+    }
+    busy = false;
+    timer = setTimeout(poll, document.hidden ? 4000 : 1000);
+  }
+  (function tick() {
+    const s = screen === 'view' && live && live.server === SERVER && live.state;
+    if (s) {
+      let t = s.clock || 0;
+      if (s.phase === 'Racing') t += ((live.age || 0) + performance.now() - liveAt) / 1000;
+      if (s.phase === 'Waiting') t = 0;
+      $('clock').textContent = fmt(t);
+    }
+    requestAnimationFrame(tick);
+  })();
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) poll(); });
+
+  // start: always ask for the password first; the bridge link is remembered
+  LS.del('vmk_race_key'); KEY = '';
+  show('login');
+})();
+</script>
+</body>
+</html>
